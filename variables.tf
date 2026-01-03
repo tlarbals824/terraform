@@ -51,5 +51,5 @@ variable "common_tags" {
 variable "kubernetes_version" {
   description = "Kubernetes version for OKE cluster"
   type        = string
-  default     = "v1.30.1"
+  default     = "v1.31.1"
 }
