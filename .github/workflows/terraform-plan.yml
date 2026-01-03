@@ -46,17 +46,30 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const output = `#### Terraform Plan
+            const outcome = '${{ steps.plan.outcome }}';
+            const stdout = `${{ steps.plan.outputs.stdout }}`;
+            const stderr = `${{ steps.plan.outputs.stderr }}`;
+            
+            let body;
+            if (outcome === 'success') {
+              body = `#### ✅ Terraform Plan
             \`\`\`
-            ${{ steps.plan.outputs.stdout }}
+            ${stdout}
             \`\`\`
             *Pushed by: @${{ github.actor }}*`;
+            } else {
+              body = `#### ❌ Terraform Plan Failed
+            \`\`\`
+            ${stderr || stdout}
+            \`\`\`
+            *Pushed by: @${{ github.actor }}*`;
+            }
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: output
+              body: body
             })
 
       - name: Plan Status
