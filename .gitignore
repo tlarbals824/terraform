@@ -1,0 +1,19 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# Sensitive files
+terraform.tfvars
+*.pem
+*.key
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
