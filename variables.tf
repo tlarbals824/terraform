@@ -17,15 +17,13 @@ variable "fingerprint" {
   type        = string
 }
 
-variable "private_key_path" {
-  description = "Path to the API private key file"
+variable "private_key" {
+  description = "OCI API private key content"
   type        = string
+  sensitive   = true
 }
 
-variable "region" {
-  description = "OCI Region (e.g., ap-seoul-1, ap-tokyo-1)"
-  type        = string
-}
+
 
 variable "compartment_ocid" {
   description = "Compartment OCID for resources"
