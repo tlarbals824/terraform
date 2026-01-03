@@ -17,10 +17,4 @@ data "oci_core_images" "arm" {
   shape                    = "VM.Standard.A1.Flex"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
-
-  filter {
-    name   = "display_name"
-    values = ["^.*-OKE-.*$"]
-    regex  = true
-  }
 }
