@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket = "terraform"
     key    = "terraform.tfstate"
-    region = "us-east-1"
+    region = "ap-chuncheon-1"
 
     endpoints = {
       s3 = "https://axgu3qzufd5m.compat.objectstorage.ap-chuncheon-1.oraclecloud.com"
