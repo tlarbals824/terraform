@@ -7,7 +7,6 @@ output "project_info" {
   description = "Project information"
   value = {
     project_name = var.project_name
-    environment  = var.environment
-    region       = var.region
+    region       = "ap-chuncheon-1"
   }
 }
