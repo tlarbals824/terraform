@@ -98,9 +98,9 @@ spec:
       values: |
         controller:
           service:
+            loadBalancerIP: "134.185.104.125"
             annotations:
               oci.oraclecloud.com/load-balancer-type: "nlb"
-              oci.oraclecloud.com/reserved-ips: "134.185.104.125"
 
   destination:
     server: https://kubernetes.default.svc
