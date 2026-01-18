@@ -115,6 +115,7 @@ spec:
       kind: CustomResourceDefinition
       jsonPointers:
         - /status
+        - /spec/preserveUnknownFields
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
