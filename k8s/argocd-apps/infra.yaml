@@ -93,7 +93,7 @@ spec:
   source:
     repoURL: https://kubernetes.github.io/ingress-nginx
     chart: ingress-nginx
-    targetRevision: 4.12.2
+    targetRevision: 4.13.1
     helm:
       values: |
         controller:
