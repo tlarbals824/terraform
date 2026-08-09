@@ -279,6 +279,28 @@ spec:
               enabled: true
               existingClaim: infra-crowdsec-pvc
               subPath: config
+          extraInitContainers:
+            - name: cleanup-subpath-dirs
+              image: busybox:1.36
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -e
+                  # subPath 제거 시 남는 서브디렉터리를 자동 정리.
+                  # CLEANUP_SUBPATH_DIRS=true 일 때만 실행 (데이터 삭제 방지).
+                  if [ "${CLEANUP_SUBPATH_DIRS:-false}" = "true" ]; then
+                    echo "subPath cleanup enabled - removing leftover dirs"
+                    rm -rf /pvc/config /pvc/crowdsec
+                    echo "cleanup done"
+                  else
+                    echo "subPath cleanup disabled - skipping"
+                  fi
+              env:
+                - name: CLEANUP_SUBPATH_DIRS
+                  value: "false"
+              volumeMounts:
+                - name: crowdsec-config
+                  mountPath: /pvc
           resources:
             requests:
               cpu: 100m
