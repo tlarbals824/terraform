@@ -273,11 +273,11 @@ spec:
           persistentVolume:
             data:
               enabled: true
-              existingClaim: infra-crowdsec-pvc
+              existingClaim: core-pvc
               subPath: crowdsec
             config:
               enabled: true
-              existingClaim: infra-crowdsec-pvc
+              existingClaim: core-pvc
               subPath: config
           extraInitContainers:
             - name: cleanup-subpath-dirs

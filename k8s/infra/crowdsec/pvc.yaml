@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: infra-crowdsec-pvc
+  name: core-pvc
   namespace: crowdsec
   labels:
     app.kubernetes.io/name: crowdsec
