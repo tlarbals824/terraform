@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - profiles.yaml
   - scenarios.yaml
+  - pvc.yaml

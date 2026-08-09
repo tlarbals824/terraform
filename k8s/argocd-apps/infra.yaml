@@ -267,17 +267,18 @@ spec:
           repository: docker.io/crowdsecurity/crowdsec
 
         lapi:
-          replicas: 0
           env:
             - name: BOUNCER_KEY_ingress
               value: "${CROWDSEC_BOUNCER_KEY}"
           persistentVolume:
             data:
               enabled: true
-              size: 1Gi
+              existingClaim: infra-crowdsec-pvc
+              subPath: crowdsec
             config:
               enabled: true
-              size: 100Mi
+              existingClaim: infra-crowdsec-pvc
+              subPath: config
           resources:
             requests:
               cpu: 100m
