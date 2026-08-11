@@ -1,0 +1,73 @@
+# Nuclio 구축 가이드
+
+이 문서는 OKE 클러스터에 **Nuclio** (서버리스 FaaS 플랫폼)를 배포하는 방법을 설명합니다.
+기존에 사용하던 OpenFaaS를 대체하며, 더 나은 웹 대시보드 UI(코드 편집기, 배포,
+테스트, 로그, 그래프)를 제공합니다.
+
+## 개요
+
+Nuclio는 고성능 이벤트/데이터 드리븐 서버리스입니다. 이 저장소에서는 ArgoCD를 통해
+GitOps 방식으로 배포하며, 대시보드 UI를 `nuclio.simproject.kr` 도메인으로
+TLS(Let's Encrypt)와 함께 노출합니다.
+
+## 구성 요소
+
+| 컴포넌트 | 역할 | Namespace |
+|---------|------|-----------|
+| Dashboard | 웹 UI (코드 편집/배포/테스트/로그) | `nuclio` |
+| Controller | Nuclio CRD(Function 등)를 배포/관리 | `nuclio` |
+| Processor | 실행된 함수 파드 | `nuclio` |
+
+## 배포 구조
+
+```
+ArgoCD (k8s/argocd-apps/infra.yaml)
+ └── infra-nuclio → Nuclio helm chart (nuclio/nuclio 0.23.4)
+```
+
+변경 사항은 `main` 브랜치에 push 되면 ArgoCD가 자동 동기화합니다.
+
+## 인증 흐름
+
+OpenFaaS와 동일하게 **Cloudflare Access** 가 로그인을 담당합니다.
+
+```
+Browser → https://nuclio.simproject.kr
+    ↓
+Cloudflare Access 로그인 (허용 이메일: srfsrf0103@gmail.com)
+    ↓
+Nuclio Dashboard (코드 편집기 + 배포 + 테스트)
+```
+
+- Terraform: `terraform/access.tf` 의 `cloudflare_access_application.nuclio`
+- 허용 이메일: `terraform/variables.tf` 의 `cloudflare_allowed_emails`
+
+## 주요 설정
+
+- **이미지 아키텍처**: OKE 노드가 arm64이므로 `quay.io/nuclio/{dashboard,controller}`
+  이미지를 **`-arm64` 태그**(`1.15.27-arm64`)로 지정합니다. (기본값은 `-amd64`라
+  arm64 노드에서 `exec format error` 발생)
+- **Ingress**: 차트 내장 `dashboard.ingress` 사용 + cert-manager TLS
+- **RBAC**: `crdAccessMode: namespaced` (함수는 `nuclio` 네임스페이스 내 배포)
+
+## 함수 빌드 관련 참고
+
+Nuclio는 함수 이미지를 빌드하기 위해 docker daemon(kind: `docker`) 또는 kaniko를
+사용합니다. 기본값은 `containerBuilderKind: docker` 인데, OKE에는 별도 docker
+daemon이 없으므로 함수를 *배포*하려면 **kaniko** 또는 외부 레지스트리 구성을
+추가해야 합니다. (대시보드 UI 자체는 추가 설정 없이 사용 가능)
+
+## 트러블슈팅
+
+### 파드가 ImagePull/exec format error
+`quay.io/nuclio/*` 이미지를 `-arm64` 태그로 지정했는지 확인하세요.
+
+### 인증서 발급 확인
+```bash
+kubectl get certificate -n nuclio
+```
+
+### DNS 레코드
+`nuclio.simproject.kr` A 레코드는 `terraform/dns.tf`의
+`cloudflare_record.nuclio` 리소스로 관리됩니다.
+Terraform 적용 후 DNS 전파까지 수 분이 걸릴 수 있습니다.

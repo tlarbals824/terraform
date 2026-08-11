@@ -27,19 +27,19 @@ resource "cloudflare_access_policy" "argocd" {
 }
 
 # =============================================================================
-# OpenFaaS Access Application
+# Nuclio Access Application
 # =============================================================================
 
-resource "cloudflare_access_application" "openfaas" {
+resource "cloudflare_access_application" "nuclio" {
   zone_id          = var.cloudflare_zone_id
-  name             = "OpenFaaS"
-  domain           = "openfaas.${local.domain_name}"
+  name             = "Nuclio"
+  domain           = "nuclio.${local.domain_name}"
   type             = "self_hosted"
   session_duration = "24h"
 }
 
-resource "cloudflare_access_policy" "openfaas" {
-  application_id = cloudflare_access_application.openfaas.id
+resource "cloudflare_access_policy" "nuclio" {
+  application_id = cloudflare_access_application.nuclio.id
   zone_id        = var.cloudflare_zone_id
   name           = "Personal Access"
   precedence     = "1"

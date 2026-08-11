@@ -20,9 +20,9 @@ resource "cloudflare_record" "argocd" {
   ttl     = 1
 }
 
-resource "cloudflare_record" "openfaas" {
+resource "cloudflare_record" "nuclio" {
   zone_id = var.cloudflare_zone_id
-  name    = "openfaas"
+  name    = "nuclio"
   content = local.nlb_ip
   type    = "A"
   proxied = true

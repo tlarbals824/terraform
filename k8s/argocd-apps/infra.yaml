@@ -427,7 +427,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-openfaas
+  name: infra-nuclio
   namespace: argocd
   finalizers:
     - argoproj.io/resources-finalizer
@@ -435,117 +435,49 @@ spec:
   project: default
 
   source:
-    repoURL: https://openfaas.github.io/faas-netes
-    chart: openfaas
-    targetRevision: 15.0.11
+    repoURL: https://nuclio.github.io/nuclio/charts
+    chart: nuclio
+    targetRevision: 0.23.4
     helm:
       values: |
-        # 배포 기본값
-        functionNamespace: openfaas-fn
-        openfaasPro: false
+        controller:
+          enabled: true
+          image:
+            repository: quay.io/nuclio/controller
+            tag: 1.15.27-arm64
+            pullPolicy: IfNotPresent
 
-        # 함수 메트릭/다중 네임스페이스 지원
-        clusterRole: true
-
-        # Cloudflare Access가 로그인을 담당하므로 OpenFaaS basic-auth 비활성화
-        # 인증 흐름: Browser -> Cloudflare Access(Google) -> OpenFaaS gateway
-        # (ArgoCD와 동일한 패턴)
-        basic_auth: false
-        generateBasicAuth: false
-        rbac: true
-
-        # Gateway는 Ingress로 노출하므로 ClusterIP로 내부 전용
-        serviceType: ClusterIP
-        exposeServices: true
-
-        gateway:
+        dashboard:
+          enabled: true
           replicas: 1
-          scaleFromZero: true
-          resources:
-            requests:
-              memory: 64Mi
-              cpu: 25m
-            limits:
-              memory: 128Mi
-              cpu: 100m
+          servicePort: 8070
+          image:
+            repository: quay.io/nuclio/dashboard
+            tag: 1.15.27-arm64
+            pullPolicy: IfNotPresent
+          # Cloudflare Access가 로그인을 담당 (ArgoCD와 동일한 패턴)
+          authConfig:
+            kind: nop
+          ingress:
+            enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            path: /
+            hosts:
+              - nuclio.simproject.kr
+            tls:
+              - secretName: nuclio-tls
+                hosts:
+                  - nuclio.simproject.kr
+            ingressClassName: nginx
 
-        # CE 컨트롤러 (faas-netes operator)
-        faasnetes:
-          resources:
-            requests:
-              memory: 64Mi
-              cpu: 25m
-            limits:
-              memory: 128Mi
-              cpu: 100m
-
-        queueWorker:
-          replicas: 1
-          resources:
-            requests:
-              memory: 64Mi
-              cpu: 25m
-            limits:
-              memory: 128Mi
-              cpu: 100m
-
-        prometheus:
+        rbac:
           create: true
-          image: docker.io/prom/prometheus:v3.13.2
-          resources:
-            requests:
-              memory: 256Mi
-              cpu: 50m
-            limits:
-              memory: 512Mi
-              cpu: 200m
-          pvc:
-            enabled: false
-
-        alertmanager:
-          create: true
-          image: docker.io/prom/alertmanager:v0.33.1
-          resources:
-            requests:
-              memory: 25Mi
-              cpu: 25m
-            limits:
-              memory: 50Mi
-              cpu: 50m
-
-        # cri-o(OKE)는 short-name 이미지를 거부함 -> Docker Hub로 완전 명시
-        stan:
-          image: docker.io/library/nats-streaming:0.25.6
+          crdAccessMode: namespaced
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: openfaas
-
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: infra-openfaas-ingress
-  namespace: argocd
-  finalizers:
-    - argoproj.io/resources-finalizer
-spec:
-  project: default
-
-  source:
-    repoURL: https://github.com/tlarbals824/infrastructure.git
-    targetRevision: main
-    path: k8s/infra/openfaas
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: openfaas
+    namespace: nuclio
 
   syncPolicy:
     automated:
