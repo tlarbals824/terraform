@@ -27,28 +27,28 @@ resource "cloudflare_access_policy" "argocd" {
 }
 
 # =============================================================================
-# Nuclio Access Application  # 주석: cert 발급을 위해 임시 제거
+# Nuclio Access Application
 # =============================================================================
-#
-# resource \"cloudflare_access_application\" \"nuclio\" {
-#   zone_id          = var.cloudflare_zone_id
-#   name             = \"Nuclio\"
-#   domain           = \"nuclio.${local.domain_name}\"
-#   type             = \"self_hosted\"
-#   session_duration = \"24h\"
-# }
-#
-# resource \"cloudflare_access_policy\" \"nuclio\" {
-#   application_id = cloudflare_access_application.nuclio.id
-#   zone_id        = var.cloudflare_zone_id
-#   name           = \"Personal Access\"
-#   precedence     = \"1\"
-#   decision       = \"allow\"
-#
-#   include {
-#     email = var.cloudflare_allowed_emails
-#   }
-# }
+
+resource "cloudflare_access_application" "nuclio" {
+  zone_id          = var.cloudflare_zone_id
+  name             = "Nuclio"
+  domain           = "nuclio.${local.domain_name}"
+  type             = "self_hosted"
+  session_duration = "24h"
+}
+
+resource "cloudflare_access_policy" "nuclio" {
+  application_id = cloudflare_access_application.nuclio.id
+  zone_id        = var.cloudflare_zone_id
+  name           = "Personal Access"
+  precedence     = "1"
+  decision       = "allow"
+
+  include {
+    email = var.cloudflare_allowed_emails
+  }
+}
 
 # =============================================================================
 # Zone Settings - SSL/TLS
