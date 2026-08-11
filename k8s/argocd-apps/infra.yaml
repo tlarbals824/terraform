@@ -489,6 +489,7 @@ spec:
 
         prometheus:
           create: true
+          image: docker.io/prom/prometheus:v3.13.2
           resources:
             requests:
               memory: 256Mi
@@ -501,6 +502,7 @@ spec:
 
         alertmanager:
           create: true
+          image: docker.io/prom/alertmanager:v0.33.1
           resources:
             requests:
               memory: 25Mi
@@ -508,6 +510,10 @@ spec:
             limits:
               memory: 50Mi
               cpu: 50m
+
+        # cri-o(OKE)는 short-name 이미지를 거부함 -> Docker Hub로 완전 명시
+        stan:
+          image: docker.io/library/nats-streaming:0.25.6
 
   destination:
     server: https://kubernetes.default.svc
