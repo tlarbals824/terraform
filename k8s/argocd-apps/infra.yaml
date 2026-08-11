@@ -451,6 +451,9 @@ spec:
           enabled: true
           replicas: 1
           servicePort: 8070
+          # OKE에 docker daemon이 없으므로 in-cluster 빌더(kaniko) 사용.
+          # docker(기본값)면 시작 시 /var/run/docker.sock 연결 실패로 크래시
+          containerBuilderKind: kaniko
           image:
             repository: quay.io/nuclio/dashboard
             tag: 1.15.27-arm64
