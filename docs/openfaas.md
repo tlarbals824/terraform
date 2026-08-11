@@ -45,24 +45,21 @@ terraform/dns.tf        # Cloudflare A 레코드 (openfaas.simproject.kr)
 ### 1. Gateway UI
 
 - URL: `https://openfaas.simproject.kr`
-- 위에서 basic auth로 보호되므로 브라우저가 계정/비밀번호를 요구합니다.
+- **Cloudflare Access** (Google 로그인)으로 보호됩니다.
+- 인증 흐름: `Browser -> Cloudflare Access(Google login) -> OpenFaaS gateway`
+- 허용 이메일: `terraform/access.tf` 의 `cloudflare_allowed_emails` (기본 `srfsrf0103@gmail.com`)
 
-### 2. 기본 인증 정보 확인
+### 2. 로그인
 
-OpenFaaS 설치 시 `basic-auth` Secret에 admin 계정/비밀번호가 생성됩니다.
+OpenFaaS 자체 basic-auth는 비활성화되어 있습니다. Cloudflare Access가 로그인을
+대신 처리합니다. 브라우저로 접속하면 Cloudflare 로그인 화면이 뜨고,
+허용 이메일로 로그인하면 Gateway UI에 접속됩니다.
 
-```bash
-# 비밀번호 조회
-kubectl -n openfaas get secret basic-auth -o jsonpath='{.data.basic-auth-password}' | base64 --decode; echo
+### 3. faas-cli 설정 (CLI)
 
-# (선택) 로그인 정보를 파일로 저장
-kubectl -n openfaas get secret basic-auth -o jsonpath='{.data.basic-auth-password}' | base64 --decode > /tmp/faas-pass
-```
-
-- 기본 아이디: `admin`
-- 기본 비밀번호: 위 명령어로 출력된 값
-
-### 3. faas-cli 설정
+> OpenFaaS basic-auth가 꺼져 있으므로, CLI는 Gateway를 직접 호출하는 경우가
+> 아니라면 UX를 위해선 UI를 사용하세요. CLI에서 함수를 관리하려면
+> Cloudflare Access를 경유하는 설정이 별도로 필요합니다.
 
 ```bash
 # faas-cli 설치 (macOS)
@@ -70,8 +67,6 @@ brew install faas-cli
 
 # Gateway 접속 설정
 export OPENFAAS_URL=https://openfaas.simproject.kr
-cat ~/.faas-pass  # 또는 위에서 뽑은 비밀번호 파일 경로
-faas-cli login --username admin --password-stdin < /tmp/faas-pass
 ```
 
 ## 함수 테스트
@@ -90,10 +85,14 @@ echo -n "OpenFaaS!" | faas-cli invoke hello
 
 ## 주의사항 / 트러블슈팅
 
-### basic_auth 비활성화 금지
-이 저장소에서는 `basic_auth: true`, `generateBasicAuth: true` 로 설정합니다.
-basic_auth를 끄면 Gateway/API가 무인증 노출되어 심각한 보안 위험이 있으므로
-비활성화하지 마세요.
+### 인증 방식 (basic-auth → Cloudflare Access)
+이 저장소에서는 OpenFaaS `basic_auth`를 **비활성화**하고, 대신 **Cloudflare Access**가
+인증을 담당합니다. (ArgoCD와 동일한 패턴)
+- `basic_auth: false`, `generateBasicAuth: false`
+- Cloudflare Access가 `openfaas.simproject.kr`을 보호하므로, 허용되지 않은
+  이메일은 Gateway에 도달하기 전에 차단됩니다.
+- 만약 OpenFaaS를 사내망/다른 인프라에 그대로 노출하는 경우에는 `basic_auth: true`로
+  되돌려야 안전합니다.
 
 ### 인증서 발급 확인
 ```bash

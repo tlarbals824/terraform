@@ -447,9 +447,11 @@ spec:
         # 함수 메트릭/다중 네임스페이스 지원
         clusterRole: true
 
-        # 핵심 컴포넌트 인증 (절대 비활성화 금지 - 심각한 보안 위험)
-        basic_auth: true
-        generateBasicAuth: true
+        # Cloudflare Access가 로그인을 담당하므로 OpenFaaS basic-auth 비활성화
+        # 인증 흐름: Browser -> Cloudflare Access(Google) -> OpenFaaS gateway
+        # (ArgoCD와 동일한 패턴)
+        basic_auth: false
+        generateBasicAuth: false
         rbac: true
 
         # Gateway는 Ingress로 노출하므로 ClusterIP로 내부 전용
