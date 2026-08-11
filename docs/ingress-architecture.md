@@ -28,6 +28,7 @@ OKE 클러스터의 Ingress 구조 및 TLS 인증서 관리 방법을 정리한 
 ┌─────────────────────────────────────────────────────────────────┐
 │  Backend Services                                               │
 │  - ArgoCD (argocd.simproject.kr)                               │
+│  - OpenFaaS Gateway UI (openfaas.simproject.kr)                 │
 │  - 추가 서비스 확장 가능                                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -244,9 +245,12 @@ k8s/infra/
 ├── cert-manager/
 │   ├── cluster-issuer.yaml   # Let's Encrypt ClusterIssuer
 │   └── kustomization.yaml
-└── ingress-nginx/
-    ├── kustomization.yaml
-    └── namespace.yaml
+├── ingress-nginx/
+│   ├── kustomization.yaml
+│   └── namespace.yaml
+└── openfaas/
+    ├── ingress.yaml          # OpenFaaS Gateway UI (openfaas.simproject.kr)
+    └── kustomization.yaml
 ```
 
 ## 참고 링크

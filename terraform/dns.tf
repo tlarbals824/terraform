@@ -19,3 +19,12 @@ resource "cloudflare_record" "argocd" {
   proxied = true
   ttl     = 1
 }
+
+resource "cloudflare_record" "openfaas" {
+  zone_id = var.cloudflare_zone_id
+  name    = "openfaas"
+  content = local.nlb_ip
+  type    = "A"
+  proxied = true
+  ttl     = 1
+}
